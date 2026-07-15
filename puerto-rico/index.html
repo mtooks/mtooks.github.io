@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puerto Rico Film — Matthew Li</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+<script>
+/* ============================================================
+   EDIT YOUR TITLES HERE.
+   One entry per photo, in display order. "title" is the label
+   shown beside each image as you scroll. Change it to whatever
+   you want, then save and refresh the page.
+   ============================================================ */
+const PHOTOS = [
+  // { src: "images/Happy_family.png",   title: "Happy Family" },
+  { src: "images/beautiful_game.png", title: "FOOTY" },
+  // { src: "images/beautiful_game_2.png", title: "Beautiful Game II" },
+  { src: "images/billow.png",         title: "Billow" },
+  { src: "images/cute.png",           title: "awwWW" },
+  { src: "images/god_rays.png",       title: "God Rays" },
+  { src: "images/horsey.png",         title: "Horsey" },
+  { src: "images/horsey2.png",        title: "Horsey II" },
+  { src: "images/icecream_death.png", title: "We're out of Ice Cream" },
+  // { src: "images/idiot.png",          title: "Idiot" },
+  { src: "images/swell.png",          title: "Swell" },
+  // { src: "images/tide.png",           title: "Tide" },
+  // { src: "images/tide2.png",          title: "Tide II" },
+  { src: "images/wrestle.png",        title: "WAS it really 4 years ago?" },
+];
+</script>
+
+<style>
+  :root {
+    --paper: #f4f2ec;
+    --ink: #16150f;
+    --mut: #b3aea1;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- fixed top bar ---- */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 26px 34px;
+    z-index: 30;
+    mix-blend-mode: multiply;
+  }
+  header .back {
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: .5px;
+    text-decoration: none;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  header .meta {
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--mut);
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* ---- pinned side labels (vertically centered, track scroll) ---- */
+  .rail {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+  .rail.left  { left: 34px; }
+  .rail.right {
+    right: 34px;
+    text-align: right;
+    display: flex;
+    align-items: baseline;
+    gap: 26px;
+  }
+  .series {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  #cur-title {
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--ink);
+    transition: opacity .2s ease;
+  }
+  .counter {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--mut);
+    white-space: nowrap;
+  }
+  .counter .rule {
+    display: inline-block;
+    width: 26px; height: 1px;
+    background: var(--mut);
+    vertical-align: middle;
+    margin: 0 8px;
+  }
+
+  /* ---- the scrolling column of photos ---- */
+  .stream {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 46vh 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40vh;
+  }
+  .shot {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .shot img {
+    display: block;
+    max-width: min(64vw, 1040px);
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+  }
+
+  /* ---- small screens: labels move inline, images fill width ---- */
+  @media (max-width: 860px) {
+    header { padding: 18px 20px; }
+    header .back { font-size: 18px; }
+    .rail { display: none; }
+    .stream {
+      padding: 120px 20px 30vh;
+      gap: 0;
+      align-items: stretch;
+    }
+    .shot {
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 16vh;
+    }
+    .shot img { max-width: 100%; max-height: none; }
+    .shot .label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 14px;
+      align-self: flex-start;
+    }
+  }
+  @media (min-width: 861px) {
+    .shot .label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="../">Matthew&nbsp;Li</a>
+  <div class="meta">Puerto Rico<br>35mm &mdash; Spring 2022</div>
+</header>
+
+<div class="rail left">
+  <div class="series">Puerto Rico</div>
+</div>
+<div class="rail right">
+  <div id="cur-title">&nbsp;</div>
+  <div class="counter"><span id="cur-num">01</span><span class="rule"></span><span id="tot-num">00</span></div>
+</div>
+
+<div class="stream" id="stream"></div>
+
+<script>
+  const stream = document.getElementById('stream');
+  const curTitle = document.getElementById('cur-title');
+  const curNum = document.getElementById('cur-num');
+  const totNum = document.getElementById('tot-num');
+  const N = PHOTOS.length;
+  totNum.textContent = String(N).padStart(2, '0');
+
+  PHOTOS.forEach((p, i) => {
+    const shot = document.createElement('figure');
+    shot.className = 'shot';
+    shot.style.margin = '0';
+    shot.dataset.index = i;
+    shot.innerHTML = `
+      <img src="${p.src}" alt="${p.title}" loading="lazy">
+      <figcaption class="label">${p.title}</figcaption>
+    `;
+    stream.appendChild(shot);
+  });
+
+  // Update the pinned title/counter to whichever photo is nearest
+  // the vertical center of the viewport.
+  const shots = [...stream.querySelectorAll('.shot')];
+  let active = -1;
+  function setActive(i) {
+    if (i === active) return;
+    active = i;
+    curTitle.style.opacity = 0;
+    setTimeout(() => {
+      curTitle.textContent = PHOTOS[i].title;
+      curNum.textContent = String(i + 1).padStart(2, '0');
+      curTitle.style.opacity = 1;
+    }, 120);
+  }
+  function onScroll() {
+    const mid = window.innerHeight / 2;
+    let best = 0, bestDist = Infinity;
+    shots.forEach((s, i) => {
+      const r = s.getBoundingClientRect();
+      const c = r.top + r.height / 2;
+      const d = Math.abs(c - mid);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    setActive(best);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('load', onScroll);
+  onScroll();
+</script>
+
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9f40017edaba4138a1639b797d880aa6"}'></script>
+<!-- End Cloudflare Web Analytics -->
+</body></html>
