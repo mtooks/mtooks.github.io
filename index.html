@@ -19,13 +19,27 @@
     user-select: none;
     -webkit-user-select: none;
   }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-  /* ---- three synced fullscreen video layers ---- */
+  /* ---- centered 16:9 stage that the videos live inside ---- */
+  .stage {
+    position: relative;
+    width: min(calc(100vw - 80px), calc((100vh - 180px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+  }
+
+  /* ---- three synced video layers, filling the stage ---- */
   .layer {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     pointer-events: none;
   }
@@ -98,6 +112,11 @@
     background: #fff;
     color: #000;
   }
+  .modes button.active {
+    background: #fff;
+    color: #000;
+    cursor: default;
+  }
 
   @media (max-width: 640px) {
     .name { top: 18px; left: 18px; font-size: 16px; }
@@ -112,10 +131,13 @@
 <body>
 
 <!-- All three videos play constantly, muted and looped, so any switch or
-     peek window lands on the exact same timestamp. -->
-<video id="v0" class="layer" src="landing/landing_normal.mp4" muted loop playsinline autoplay preload="auto"></video>
-<video id="v1" class="layer" src="landing/landing_ascii.mp4"  muted loop playsinline autoplay preload="auto"></video>
-<video id="v2" class="layer" src="landing/landing_glitch.mp4" muted loop playsinline autoplay preload="auto"></video>
+     peek window lands on the exact same timestamp. They live inside a
+     centered 16:9 stage on a black background. -->
+<div class="stage" id="stage">
+  <video id="v0" class="layer" src="landing/landing_normal.mp4" muted loop playsinline autoplay preload="auto"></video>
+  <video id="v1" class="layer" src="landing/landing_ascii.mp4"  muted loop playsinline autoplay preload="auto"></video>
+  <video id="v2" class="layer" src="landing/landing_glitch.mp4" muted loop playsinline autoplay preload="auto"></video>
+</div>
 
 <!-- clip regions (one per video) that the peek rectangles live in -->
 <svg width="0" height="0" style="position:fixed">
@@ -151,6 +173,14 @@
     document.getElementById('cp2'),
   ];
   const modesEl = document.getElementById('modes');
+  const stage = document.getElementById('stage');
+
+  /* Peek rectangles live in the video's own coordinate space, whose
+     origin is the top-left of the stage. Convert pointer coords to it. */
+  function toLocal(e) {
+    const r = stage.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
 
   let base = 0;   // which video is fullscreen
 
@@ -184,9 +214,10 @@
 
   function renderButtons() {
     modesEl.innerHTML = '';
-    [(base + 1) % 3, (base + 2) % 3].forEach(i => {
+    LABELS.forEach((label, i) => {
       const b = document.createElement('button');
-      b.textContent = LABELS[i];
+      b.textContent = label;
+      if (i === base) b.classList.add('active');
       b.addEventListener('pointerdown', e => e.stopPropagation());
       b.addEventListener('click', e => { e.stopPropagation(); switchTo(i); });
       modesEl.appendChild(b);
@@ -227,29 +258,34 @@
   document.addEventListener('pointerdown', e => {
     if (e.target instanceof Element && e.target.closest('a, button')) return;
     if (e.button !== 0 && e.button !== 2) return;
+    const p = toLocal(e);
+    // only start a peek inside the video rectangle
+    if (p.x < 0 || p.y < 0 || p.x > stage.clientWidth || p.y > stage.clientHeight) return;
     const offset = e.button === 0 ? 1 : 2;
     const rect = document.createElementNS(SVGNS, 'rect');
-    rect.setAttribute('x', e.clientX);
-    rect.setAttribute('y', e.clientY);
+    rect.setAttribute('x', p.x);
+    rect.setAttribute('y', p.y);
     rect.setAttribute('width', 0);
     rect.setAttribute('height', 0);
     clips[(base + offset) % 3].appendChild(rect);
     squares.push({ rect, offset });
-    drag = { rect, x0: e.clientX, y0: e.clientY };
+    drag = { rect, x0: p.x, y0: p.y };
   });
 
   document.addEventListener('pointermove', e => {
     if (!drag) return;
-    drag.rect.setAttribute('x', Math.min(drag.x0, e.clientX));
-    drag.rect.setAttribute('y', Math.min(drag.y0, e.clientY));
-    drag.rect.setAttribute('width',  Math.abs(e.clientX - drag.x0));
-    drag.rect.setAttribute('height', Math.abs(e.clientY - drag.y0));
+    const p = toLocal(e);
+    drag.rect.setAttribute('x', Math.min(drag.x0, p.x));
+    drag.rect.setAttribute('y', Math.min(drag.y0, p.y));
+    drag.rect.setAttribute('width',  Math.abs(p.x - drag.x0));
+    drag.rect.setAttribute('height', Math.abs(p.y - drag.y0));
   });
 
   function endDrag(e) {
     if (!drag) return;
-    const w = Math.abs(e.clientX - drag.x0);
-    const h = Math.abs(e.clientY - drag.y0);
+    const p = toLocal(e);
+    const w = Math.abs(p.x - drag.x0);
+    const h = Math.abs(p.y - drag.y0);
     if (w < 12 || h < 12) {                     // a click, not a drag
       drag.rect.remove();
       squares = squares.filter(s => s.rect !== drag.rect);
@@ -273,25 +309,27 @@
     clips[(base + offset) % 3].appendChild(rect);
     squares.push({ rect, offset });
   }
-  addSquare(innerWidth * .7330, innerHeight * .4180, innerWidth * .1520, innerHeight * .3430, 2);
-  addSquare(innerWidth * .5370, innerHeight * .2450, innerWidth * .1970, innerHeight * .3870, 1);
-  addSquare(innerWidth * .3110, innerHeight * .4390, innerWidth * .0680, innerHeight * .1370, 2);
-  addSquare(innerWidth * .3800, innerHeight * .5760, innerWidth * .0810, innerHeight * .1830, 1);
-  addSquare(innerWidth * .8503, innerHeight * .9150, innerWidth * .0344, innerHeight * .0691, 2);
-  addSquare(innerWidth * .0906, innerHeight * .0870, innerWidth * .0771, innerHeight * .1278, 2);
-  addSquare(innerWidth * .1227, innerHeight * .2977, innerWidth * .0901, innerHeight * .1646, 1);
-  addSquare(innerWidth * .2516, innerHeight * .1122, innerWidth * .0807, innerHeight * .1460, 1);
-  addSquare(innerWidth * .1802, innerHeight * .5830, innerWidth * .0630, innerHeight * .1558, 2);
-  addSquare(innerWidth * .4589, innerHeight * .0842, innerWidth * .0677, innerHeight * .0856, 2);
-  addSquare(innerWidth * .7276, innerHeight * .1649, innerWidth * .0786, innerHeight * .1015, 2);
-  addSquare(innerWidth * .8727, innerHeight * .2908, innerWidth * .0680, innerHeight * .1632, 2);
-  addSquare(innerWidth * .9195, innerHeight * .5797, innerWidth * .0333, innerHeight * .1569, 2);
-  addSquare(innerWidth * .6211, innerHeight * .8019, innerWidth * .0523, innerHeight * .0999, 2);
-  addSquare(innerWidth * .4982, innerHeight * .7355, innerWidth * .0755, innerHeight * .0933, 1);
-  addSquare(innerWidth * .4005, innerHeight * .8689, innerWidth * .0643, innerHeight * .1278, 2);
-  addSquare(innerWidth * .4091, innerHeight * .2626, innerWidth * .0648, innerHeight * .1081, 2);
-  addSquare(innerWidth * .7445, innerHeight * .9056, innerWidth * .0747, innerHeight * .1267, 1);
-  addSquare(innerWidth * .2708, innerHeight * .7465, innerWidth * .0904, innerHeight * .1591, 1);
+  const sr = stage.getBoundingClientRect();
+  const innerW = sr.width, innerH = sr.height;
+  addSquare(innerW * .7330, innerH * .4180, innerW * .1520, innerH * .3430, 2);
+  addSquare(innerW * .5370, innerH * .2450, innerW * .1970, innerH * .3870, 1);
+  addSquare(innerW * .3110, innerH * .4390, innerW * .0680, innerH * .1370, 2);
+  addSquare(innerW * .3800, innerH * .5760, innerW * .0810, innerH * .1830, 1);
+  addSquare(innerW * .8503, innerH * .9150, innerW * .0344, innerH * .0691, 2);
+  addSquare(innerW * .0906, innerH * .0870, innerW * .0771, innerH * .1278, 2);
+  addSquare(innerW * .1227, innerH * .2977, innerW * .0901, innerH * .1646, 1);
+  addSquare(innerW * .2516, innerH * .1122, innerW * .0807, innerH * .1460, 1);
+  addSquare(innerW * .1802, innerH * .5830, innerW * .0630, innerH * .1558, 2);
+  addSquare(innerW * .4589, innerH * .0842, innerW * .0677, innerH * .0856, 2);
+  addSquare(innerW * .7276, innerH * .1649, innerW * .0786, innerH * .1015, 2);
+  addSquare(innerW * .8727, innerH * .2908, innerW * .0680, innerH * .1632, 2);
+  addSquare(innerW * .9195, innerH * .5797, innerW * .0333, innerH * .1569, 2);
+  addSquare(innerW * .6211, innerH * .8019, innerW * .0523, innerH * .0999, 2);
+  addSquare(innerW * .4982, innerH * .7355, innerW * .0755, innerH * .0933, 1);
+  addSquare(innerW * .4005, innerH * .8689, innerW * .0643, innerH * .1278, 2);
+  addSquare(innerW * .4091, innerH * .2626, innerW * .0648, innerH * .1081, 2);
+  addSquare(innerW * .7445, innerH * .9056, innerW * .0747, innerH * .1267, 1);
+  addSquare(innerW * .2708, innerH * .7465, innerW * .0904, innerH * .1591, 1);
 
   applyLayers();
   renderButtons();
