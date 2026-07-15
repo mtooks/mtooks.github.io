@@ -262,6 +262,20 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') clearSquares(); });
   document.addEventListener('dblclick', clearSquares);
 
+  /* start with a couple of peek squares already on the wall:
+     one LMB-style (ascii) and one RMB-style (spooky) */
+  function addSquare(x, y, w, h, offset) {
+    const rect = document.createElementNS(SVGNS, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', h);
+    clips[(base + offset) % 3].appendChild(rect);
+    squares.push({ rect, offset });
+  }
+  addSquare(innerWidth * .13, innerHeight * .16, innerWidth * .22, innerHeight * .36, 1);
+  addSquare(innerWidth * .64, innerHeight * .52, innerWidth * .23, innerHeight * .32, 2);
+
   applyLayers();
   renderButtons();
 </script>
