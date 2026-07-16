@@ -12,6 +12,10 @@
   header { padding:24px 24px 14px; border-bottom:1px solid var(--line); position:sticky; top:0;
            background:#0f1115f5; backdrop-filter:blur(8px); z-index:20; }
   h1 { margin:0 0 6px; font-size:21px; }
+  header .homeback { display:inline-block; margin:0 0 10px; color:var(--mut);
+           text-decoration:none; font-family:"Space Grotesk",sans-serif; font-weight:700;
+           font-size:11px; letter-spacing:1.2px; text-transform:uppercase; }
+  header .homeback:hover { color:var(--ink); }
   /* shared brand lockup: N&F logo — "The Archives" (Times New Roman) */
   .brand { display:flex; align-items:center; gap:13px; margin:0 0 6px; }
   .brand img { height:44px; width:auto; display:block; }
@@ -172,6 +176,7 @@
   <div id="intro-hint">scroll to wander · click a fabric to open it · click empty space to skip</div>
 </div>
 <header>
+  <a class="homeback" href="../">&larr;&nbsp;Home</a>
   <div class="brand">
     <img src="https://nakedandfamousdenim.com/cdn/shop/files/Naked_Famous_Denim.png?v=1778706745&amp;width=480" alt="Naked &amp; Famous">
     <span class="dash">—</span><span class="arch">The Archives</span>

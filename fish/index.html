@@ -13,7 +13,7 @@
     margin: 0;
     height: 100%;
     overflow: hidden;
-    background: #f0eeea;              /* matches the painting's paper */
+    background: #000;
     font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
   body {
@@ -22,51 +22,51 @@
     justify-content: center;
   }
 
-  /* the pond video fills the viewport; its cream background blends into the page */
-  video {
-    max-width: 100vw;
-    max-height: 100vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
+  /* same centered 16:9 stage as the landing page, black bars around it */
+  .stage {
+    position: relative;
+    width: min(calc(100vw - 80px), calc((100vh - 180px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+  }
+  .stage video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  /* overlay chrome — dark ink, readable on the pale paper */
+  /* overlay chrome (white via difference blend, matches landing) */
   .ui {
     position: fixed;
     z-index: 10;
-    color: #1a1a1a;
+    color: #fff;
+    mix-blend-mode: difference;
     text-decoration: none;
   }
-  .name {
-    top: 26px; left: 30px;
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
   .back {
-    top: 30px; right: 30px;
+    top: 26px; left: 34px;
     font-weight: 700;
     font-size: 12px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    opacity: .7;
+    opacity: .85;
   }
   .back:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
 
   @media (max-width: 640px) {
-    .name { top: 18px; left: 18px; font-size: 16px; }
-    .back { top: 21px; right: 18px; font-size: 10px; letter-spacing: 1px; }
+    .back { top: 18px; left: 20px; font-size: 10px; letter-spacing: 1px; }
   }
 </style>
 </head>
 <body>
 
-<video src="../pond_koi_threequarter.mp4" muted loop playsinline autoplay preload="auto"></video>
+<div class="stage">
+  <video src="../pond_koi_threequarter.mp4" muted loop playsinline autoplay preload="auto"></video>
+</div>
 
-<a class="ui name" href="../">Matthew&nbsp;Li</a>
 <a class="ui back" href="../">&larr;&nbsp;Home</a>
 
 <!-- Cloudflare Web Analytics -->
