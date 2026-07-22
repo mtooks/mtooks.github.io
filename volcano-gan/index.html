@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volcano GAN — Matthew Li</title>
+
+<style>
+  @font-face {
+    font-family: "Dot Impact";
+    src: url("fonts/dotimpact.ttf") format("truetype");
+    font-display: swap;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #610303;
+    color: #f4e9e9;
+    font-family: "Times New Roman", Times, serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: 84px 24px 80px;
+  }
+
+  /* ---- back link ---- */
+  .back {
+    position: fixed;
+    top: 26px; left: 30px;
+    color: #f4e9e9;
+    text-decoration: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: .75;
+    z-index: 10;
+  }
+  .back:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+
+  /* ---- centered column ---- */
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* ---- big dot-impact title ---- */
+  .title {
+    font-family: "Dot Impact", "Times New Roman", serif;
+    font-weight: 400;
+    text-align: center;
+    line-height: 1;
+    letter-spacing: 4px;
+    font-size: clamp(48px, 11vw, 128px);
+    margin: 0 0 40px;
+    color: #ffffff;
+  }
+
+  /* ---- two videos stacked with a little space ---- */
+  .films {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 0 auto 52px;
+  }
+  .films video {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #2a0101;
+    border: 1px solid rgba(255,255,255,.14);
+  }
+
+  /* ---- description (Times New Roman) ---- */
+  .desc { font-size: 17px; line-height: 1.6; }
+  .desc h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 34px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,.22);
+    letter-spacing: .5px;
+  }
+  .desc h2:first-child { margin-top: 0; }
+  .desc ul { margin: 0; padding-left: 22px; }
+  .desc li { margin: 7px 0; }
+  .desc code {
+    font-family: "Courier New", monospace;
+    font-size: .9em;
+    background: rgba(0,0,0,.25);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 70px 16px 56px; }
+    .desc { font-size: 15px; }
+    .desc h2 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back" href="../">&larr;&nbsp;Matthew&nbsp;Li</a>
+
+<div class="wrap">
+  <h1 class="title">VOLCANO GAN</h1>
+
+  <div class="films">
+    <video src="volcano_gan1.mp4" controls loop playsinline muted autoplay preload="metadata"></video>
+    <video src="volcano_gan2.mp4" controls loop playsinline muted autoplay preload="metadata"></video>
+  </div>
+
+  <div class="desc">
+    <h2>Input conditioning (degrade / filters)</h2>
+    <ul>
+      <li>Paired input synthesized on the fly from each target &mdash; no fixed pairs.</li>
+      <li>Blob (default): grayscale &rarr; heavy downscale (24&times;) &rarr; upscale + brightness/contrast jitter; GPU, fresh randomness per batch.</li>
+      <li>Filters: A1111-style canny / sobel / softedge / scribble. Selectable at train + infer; model only generalizes to the filter it was trained on.</li>
+    </ul>
+
+    <h2>Model</h2>
+    <ul>
+      <li>UNetGenerator &mdash; 8-level U-Net, skip connections, InstanceNorm, dropout on first 3 decoder blocks. 1ch (degraded gray) &rarr; 3ch color. Fully conv &rarr; runs at 256 (1&times;1 bottleneck) or 512 (2&times;2).</li>
+      <li>PatchDiscriminator &mdash; 70&times;70 PatchGAN, conditioned on (input, target).</li>
+    </ul>
+
+    <h2>Training</h2>
+    <ul>
+      <li>Per step: target batch &rarr; <code>make_input()</code> (blob or filter) &rarr; update D, then G.</li>
+      <li>Loss: GAN (BCE-logits) + 100&middot;L1 + &lambda;&middot;VGG16 perceptual (kills L1 blur).</li>
+      <li>Adam (2e-4, &beta; 0.5/0.999), batch 4, AMP, ~100k&ndash;500k iters.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9f40017edaba4138a1639b797d880aa6"}'></script>
+<!-- End Cloudflare Web Analytics -->
+</body></html>
