@@ -1,0 +1,16 @@
+# Caddy serves this whole repo as a static website.
+# It listens on port 8080 (tell Railway "8080" as the port).
+:8080
+
+root * /usr/share/caddy
+encode gzip
+file_server
+
+# --- Future: backend "apps" in their own Railway services ---
+# When you build an app that needs a server, deploy it as its own
+# Railway service, then uncomment a block like this to make it
+# appear at yourdomain.com/appname (over Railway's private network):
+#
+# handle_path /appname/* {
+#     reverse_proxy appname.railway.internal:8080
+# }
