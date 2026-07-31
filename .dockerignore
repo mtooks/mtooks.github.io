@@ -1,6 +1,5 @@
 .git
 .claude
 Dockerfile
-Caddyfile
 .dockerignore
 README.md
