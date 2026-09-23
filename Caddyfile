@@ -4,13 +4,15 @@
 
 root * /usr/share/caddy
 encode gzip
-file_server
 
-# --- Future: backend "apps" in their own Railway services ---
-# When you build an app that needs a server, deploy it as its own
-# Railway service, then uncomment a block like this to make it
-# appear at yourdomain.com/appname (over Railway's private network):
-#
-# handle_path /appname/* {
-#     reverse_proxy appname.railway.internal:8080
-# }
+# --- Backend "apps" in their own Railway services ---
+# Each app is its own Railway service, reached over Railway's private
+# network and shown at yourdomain.com/appname.
+
+# Continuous Learning (github.com/mtooks/continuous-learning)
+redir /learn /learn/
+handle_path /learn/* {
+    reverse_proxy continuous-learning.railway.internal:8080
+}
+
+file_server
